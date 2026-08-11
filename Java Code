@@ -1,0 +1,112 @@
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
+import javax.swing.*;
+
+public class SnakeGame extends JPanel implements KeyListener {
+
+    ArrayList<Point> snake = new ArrayList<>();
+    Point food;
+    int score = 0;
+    int size = 20;
+    int width = 20;
+    int height = 20;
+
+    public SnakeGame() {
+        snake.add(new Point(5, 5));
+        snake.add(new Point(4, 5));
+        snake.add(new Point(3, 5));
+
+        spawnFood();
+
+        setPreferredSize(new Dimension(width * size, height * size));
+        setBackground(Color.BLACK);
+        addKeyListener(this);
+        setFocusable(true);
+    }
+
+    void spawnFood() {
+        Random r = new Random();
+        while (true) {
+            Point p = new Point(r.nextInt(width), r.nextInt(height));
+            if (!snake.contains(p)) {
+                food = p;
+                break;
+            }
+        }
+    }
+
+    public void move(int dx, int dy) {
+        Point head = snake.get(0);
+        Point newHead = new Point(head.x + dx, head.y + dy);
+
+        if (newHead.x < 0 || newHead.x >= width ||
+            newHead.y < 0 || newHead.y >= height ||
+            snake.contains(newHead)) {
+
+            JOptionPane.showMessageDialog(this, "Game Over!\nScore : " + score);
+            System.exit(0);
+        }
+
+        snake.add(0, newHead);
+
+        if (newHead.equals(food)) {
+            score++;
+            spawnFood();
+        } else {
+            snake.remove(snake.size() - 1);
+        }
+
+        repaint();
+    }
+
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        g.setColor(Color.RED);
+        g.fillOval(food.x * size, food.y * size, size, size);
+
+        g.setColor(Color.GREEN);
+        for (Point p : snake) {
+            g.fillRect(p.x * size, p.y * size, size, size);
+        }
+
+        g.setColor(Color.WHITE);
+        g.drawString("Score : " + score, 10, 20);
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_UP:
+                move(0, -1);
+                break;
+            case KeyEvent.VK_DOWN:
+                move(0, 1);
+                break;
+            case KeyEvent.VK_LEFT:
+                move(-1, 0);
+                break;
+            case KeyEvent.VK_RIGHT:
+                move(1, 0);
+                break;
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {}
+
+    @Override
+    public void keyTyped(KeyEvent e) {}
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Snake Game");
+        SnakeGame game = new SnakeGame();
+
+        frame.add(game);
+        frame.pack();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+}
